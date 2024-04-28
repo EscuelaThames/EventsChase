@@ -23,9 +23,9 @@ class Users(db.Model):
     
 class Credentials(db.Model):
     __tablename__ = 'Credentials'
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete='CASCADE'), primary_key=True)
     username = db.Column(db.String(255), nullable=False, unique=True)
-    password_hash = db.Column(db.String(60), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     
     # serializing model for front end
     def to_json(self):
@@ -65,7 +65,7 @@ class Payment_Methods(db.Model):
     
 class Event(db.Model):
     __tablename__ = 'Event'
-    event_id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     event_name = db.Column(db.String(255), nullable=False)
     event_date = db.Column(db.DateTime, nullable=False)
     event_type = db.Column(ENUM('Concert', 'Game', 'Conference', 'Convention', 'Show', 'Other'), nullable=False)
@@ -81,7 +81,7 @@ class Event(db.Model):
         return {
             'eventId': self.event_id,
             'eventName': self.event_name,
-            'eventDate': self.event_dae,
+            'eventDate': self.event_date,
             'eventType': self.event_type,
             'capacity': self.capacity
         }
@@ -89,9 +89,10 @@ class Event(db.Model):
 class Ticket(db.Model):
     __tablename__ = 'Ticket'
     ticket_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id', ondelete='CASCADE'))
     event_id = db.Column(db.Integer, db.ForeignKey('Event.event_id'), nullable=False)
     seat_number = db.Column(db.String(5))
+    price = db.Column(db.Integer, nullable=False)
     
     # serializing model for front end
     def to_json(self):
@@ -99,7 +100,8 @@ class Ticket(db.Model):
             'ticketId': self.ticket_id,
             'userId': self.user_id,
             'eventId': self.event_id,
-            'seatNumber': self.seat_number
+            'seatNumber': self.seat_number,
+            'price': self.price
         }
     
 class Transaction(db.Model):
@@ -107,9 +109,9 @@ class Transaction(db.Model):
     transaction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ticket_id = db.Column(db.Integer, db.ForeignKey('Ticket.ticket_id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.user_id'), nullable=False)
-    price = db.Column(db.Integer, nullable=False)
     payment_method_id = db.Column(db.Integer, db.ForeignKey('Payment_Methods.payment_method_id'), nullable=False)
     payment_date = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
+    price = db.Column(db.Integer, nullable=False)
     
     # serializing model for front end
     def to_json(self):
@@ -117,7 +119,7 @@ class Transaction(db.Model):
             'transaction_id': self.transaction_id,
             'ticket_id': self.ticket_id,
             'user_id': self.user_id,
-            'price': self.price,
             'paymentMethodId': self.payment_method_id,
-            'paymentDate': self.payment_date
+            'paymentDate': self.payment_date,
+            'price': self.price
         }
