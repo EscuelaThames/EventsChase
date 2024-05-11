@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 app = Flask(__name__)
+# cors lets localhost and vite run better together
 CORS(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql+pymysql://root:ubuntuubuntu@localhost/chaseEvents'
